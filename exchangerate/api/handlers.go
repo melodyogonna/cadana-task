@@ -1,49 +1,54 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
 	"exchangerate/internal/wrapper"
 	testhttpclient "exchangerate/pkg/testHttpClient"
+	"log"
 	"net/http"
 )
 
-func getExchangeRate(pair string) (float32, error) {
+func launchServices(ctx context.Context, pair string) (float64, error) {
 	// get exchange rate for pair
 	httpClient := testhttpclient.TestHTTPClient{}
 	services := wrapper.Init(httpClient)
+	resultChan := make(chan float64)
 
-	result := make(chan float32)
-	err := make(chan error)
 	for _, service := range services {
-		go service.GetExchangeRate(pair, result, err)
-	}
-
-	var outPut float32
-	var numErrors int
-
-	for {
-		select {
-		case r := <-result:
-			outPut = r
-			break
-
-		case <-err:
-			if numErrors == 0 {
-				numErrors += 1
-				continue
-			} else {
-				numErrors += 1
+		go func(s wrapper.Wrapper) {
+			select {
+			case <-ctx.Done():
 				break
+			case result := <-s.GetExchangeRate(pair):
+				if result.Err != nil {
+					log.Print(result.Err)
+					break
+				}
+				resultChan <- result.Value
+
 			}
-		}
+		}(service)
 	}
 
-	if numErrors > 1 {
-		return 0, errors.New("Unable to retrieve exchange rate")
+	ouput := <-resultChan
+
+	return ouput, nil
+
+}
+
+func getExchangeRate(pair string) (float64, error) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	result, err := launchServices(ctx, pair)
+
+	if err != nil {
+		return 0, err
 	}
 
-	return outPut, nil
+	return result, nil
 }
 
 type currencyPair struct {
@@ -70,7 +75,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	var res map[string]float32
+	res := make(map[string]float64)
 
 	res[parsed.Pair] = price
 

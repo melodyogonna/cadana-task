@@ -1,7 +1,12 @@
 package wrapper
 
+type result struct {
+	Err   error
+	Value float64
+}
+
 type Wrapper interface {
-	GetExchangeRate(pair string, c chan float32, e chan error)
+	GetExchangeRate(pair string) <-chan result
 }
 
 type HttpClient interface {

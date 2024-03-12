@@ -10,13 +10,20 @@ type serviceTwo struct {
 	url        string
 }
 
-func (s2 serviceTwo) GetExchangeRate(pair string, c chan float32, e chan error) {
-	res, err := s2.httpClient.Get(s2.url + "/?pair=" + pair)
-	if err != nil {
-		e <- err
-	}
+func (s2 serviceTwo) GetExchangeRate(pair string) <-chan result {
+	c := make(chan result)
 
-	c <- float32(res.(float64))
+	go func() {
+		res, err := s2.httpClient.Get(s2.url + "/?pair=" + pair)
+		if err != nil {
+			c <- result{Err: err, Value: 0}
+		}
+
+		c <- result{Err: err, Value: res.(float64)}
+
+	}()
+
+	return c
 }
 
 func initService2(httpClient HttpClient) serviceTwo {
