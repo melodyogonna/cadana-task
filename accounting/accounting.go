@@ -106,6 +106,27 @@ func (persons *Persons) FilterByCurrency(criteria int) ([]Person, error) {
 					filteredPersons = append(filteredPersons, person)
 				}
 			} else {
+				exchangeRate, err := retrieveRate(pair)
+
+				if err != nil {
+					log.Print(err)
+					return []Person{}, errors.New("Unable to apply filter")
+				}
+
+				if exchangeRate <= 0 {
+					return []Person{}, fmt.Errorf("Did not return valid exchange rate for - %s", pair)
+				}
+
+				cv, err := strconv.ParseFloat(person.Salary.Value, 64)
+				if err != nil {
+					return []Person{}, fmt.Errorf("Not a valid number %s for user %s", person.Salary.Value, person.ID)
+				}
+
+				currentRates[pair] = exchangeRate
+				usdEquiv := cv * exchangeRate
+				if usdEquiv >= float64(criteria) {
+					filteredPersons = append(filteredPersons, person)
+				}
 
 			}
 

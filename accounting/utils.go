@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"os"
 )
 
 func retrieveRate(pair string) (float64, error) {
@@ -22,6 +23,9 @@ func retrieveRate(pair string) (float64, error) {
 
 	req.Header.Set("content-type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, err
+	}
 
 	defer resp.Body.Close()
 	r, err := io.ReadAll(resp.Body)
@@ -35,5 +39,35 @@ func retrieveRate(pair string) (float64, error) {
 	}
 
 	return res[pair], nil
+
+}
+
+func getJsonFromFileSystem(jsonPath string) (*[]Person, error) {
+	file, err := os.Open(jsonPath)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	var p []Person
+
+	if err := json.Unmarshal(data, &p); err != nil {
+		return nil, err
+	}
+
+	return &p, nil
+}
+
+func InitPersonsFromJson(jsonPath string) (Persons, error) {
+	persons, err := getJsonFromFileSystem(jsonPath)
+	if err != nil {
+		return Persons{}, err
+	}
+
+	return Persons{Data: *persons}, nil
 
 }
