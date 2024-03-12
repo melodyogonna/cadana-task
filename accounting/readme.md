@@ -3,7 +3,7 @@
 A simple package that provides some aggregation of an assumed json data in the format:
 
 ```json
-[{"id": string, "personName": string, "salary": {"value": string (numerical), "currency": string}}]
+[{"id": string, "personName": "string", "salary": {"value": "string (numerical)", "currency": "string"}}]
 ```
 
 This data can be sorted by salary, grouped by currency, and filtered by some criteria. "personName" is shortened to "Name" when the json is parsed.

@@ -19,3 +19,12 @@ $ go build .
 $ ./exchangerate
 
 ```
+
+A valid request returns
+
+```
+{"USD-AUD": 0.66}
+```
+
+Which is not actually a valid exchange rate as no calls are made to any external service, instead I implemented a skeleton of how such a service would
+be implemented if neccesary.
