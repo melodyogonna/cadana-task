@@ -1,7 +1,9 @@
 package testhttpclient
 
+import "math/rand"
+
 type TestHTTPClient struct{}
 
 func (client TestHTTPClient) Get(url string) (any, error) {
-	return 1.0, nil
+	return rand.Float64(), nil
 }

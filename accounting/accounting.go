@@ -8,13 +8,15 @@ import (
 	"strconv"
 )
 
+type salary struct {
+	Value    string `json:"value"`
+	Currency string `json:"currency"`
+}
+
 type Person struct {
 	ID     string `json:"id"`
 	Name   string `json:"personName"`
-	Salary struct {
-		Value    string `json:"value"`
-		Currency string `json:"currency"`
-	} `json:"salary"`
+	Salary salary `json:"salary"`
 }
 
 type Persons struct {
@@ -47,7 +49,7 @@ func (persons *Persons) sortAsc() {
 		cv, _ := strconv.ParseFloat(cur.Salary.Value, 32)
 		nv, _ := strconv.ParseFloat(next.Salary.Value, 32)
 
-		return cv > nv
+		return cv < nv
 	})
 
 }
@@ -61,12 +63,12 @@ func (persons *Persons) sortDesc() {
 		cv, _ := strconv.ParseFloat(cur.Salary.Value, 32)
 		nv, _ := strconv.ParseFloat(next.Salary.Value, 32)
 
-		return cv < nv
+		return cv > nv
 	})
 
 }
 
-// Group the persons in our data by currency
+// Group the persons in our data by currency.
 func (persons *Persons) GroupByCurrency() map[string][]Person {
 	var group map[string][]Person = make(map[string][]Person)
 
@@ -77,8 +79,9 @@ func (persons *Persons) GroupByCurrency() map[string][]Person {
 	return group
 }
 
-// Filter the persons in our object
-func (persons *Persons) FilterByCurrency(criteria int) ([]Person, error) {
+// Filter the persons in our object by the salary they earn.
+// The criteria takes an
+func (persons *Persons) FilterByCurrency(criteria float64) ([]Person, error) {
 	var filteredPersons []Person
 	var currentRates map[string]float64 = make(map[string]float64)
 
@@ -89,7 +92,7 @@ func (persons *Persons) FilterByCurrency(criteria int) ([]Person, error) {
 				return []Person{}, fmt.Errorf("Not a valid number %s for user %s", person.Salary.Value, person.ID)
 			}
 
-			if cv >= float64(criteria) {
+			if cv >= criteria {
 				filteredPersons = append(filteredPersons, person)
 			}
 		} else {
@@ -102,7 +105,7 @@ func (persons *Persons) FilterByCurrency(criteria int) ([]Person, error) {
 				}
 
 				usdEquiv := cv * rate
-				if usdEquiv >= float64(criteria) {
+				if usdEquiv >= criteria {
 					filteredPersons = append(filteredPersons, person)
 				}
 			} else {
@@ -124,7 +127,7 @@ func (persons *Persons) FilterByCurrency(criteria int) ([]Person, error) {
 
 				currentRates[pair] = exchangeRate
 				usdEquiv := cv * exchangeRate
-				if usdEquiv >= float64(criteria) {
+				if usdEquiv >= criteria {
 					filteredPersons = append(filteredPersons, person)
 				}
 

@@ -69,6 +69,15 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if parsed.Pair == "" {
+		message := map[string]string{"message": "'currency-pair' not passed"}
+		m, _ := json.Marshal(message)
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(m)
+		return
+	}
+
 	price, err := getExchangeRate(parsed.Pair)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
