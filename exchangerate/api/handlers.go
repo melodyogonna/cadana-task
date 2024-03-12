@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-func launchServices(ctx context.Context, pair string) (float64, error) {
+func launchServices(ctx context.Context, pair string) (float32, error) {
 	// get exchange rate for pair
 	httpClient := testhttpclient.TestHTTPClient{}
 	services := wrapper.Init(httpClient)
-	resultChan := make(chan float64)
+	resultChan := make(chan float32)
 
 	for _, service := range services {
 		go func(s wrapper.Wrapper) {
@@ -37,7 +37,7 @@ func launchServices(ctx context.Context, pair string) (float64, error) {
 
 }
 
-func getExchangeRate(pair string) (float64, error) {
+func getExchangeRate(pair string) (float32, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -84,7 +84,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	res := make(map[string]float64)
+	res := make(map[string]float32)
 
 	res[parsed.Pair] = price
 

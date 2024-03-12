@@ -18,7 +18,7 @@ func (s1 serviceOne) GetExchangeRate(pair string) <-chan result {
 		if err != nil {
 			c <- result{Err: err, Value: 0}
 		}
-		c <- result{Err: nil, Value: res.(float64)}
+		c <- result{Err: nil, Value: res.(float32)}
 	}()
 
 	return c

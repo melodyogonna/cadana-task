@@ -80,8 +80,12 @@ func (persons *Persons) GroupByCurrency() map[string][]Person {
 }
 
 // Filter the persons in our object by the salary they earn.
-// The criteria takes an
-func (persons *Persons) FilterByCurrency(criteria float64) ([]Person, error) {
+// The criteria takes an unsigned integer and filters persons with a salary greater than the amount.
+// If the salary currency is not in USD it'll attempt to make a conversion by currency an exchangerate API
+// to retrieve the exchange rate between salary currency and USD.
+// Exchange rates are saved in memory and reused if the same pair is encountered again.
+// This implementation is not generalised and will always filter based on the salaries that are greater than the criteria
+func (persons *Persons) FilterByCurrency(criteria uint32) ([]Person, error) {
 	var filteredPersons []Person
 	var currentRates map[string]float64 = make(map[string]float64)
 
@@ -92,7 +96,7 @@ func (persons *Persons) FilterByCurrency(criteria float64) ([]Person, error) {
 				return []Person{}, fmt.Errorf("Not a valid number %s for user %s", person.Salary.Value, person.ID)
 			}
 
-			if cv >= criteria {
+			if cv >= float64(criteria) {
 				filteredPersons = append(filteredPersons, person)
 			}
 		} else {
@@ -105,7 +109,7 @@ func (persons *Persons) FilterByCurrency(criteria float64) ([]Person, error) {
 				}
 
 				usdEquiv := cv * rate
-				if usdEquiv >= criteria {
+				if usdEquiv >= float64(criteria) {
 					filteredPersons = append(filteredPersons, person)
 				}
 			} else {
@@ -127,7 +131,7 @@ func (persons *Persons) FilterByCurrency(criteria float64) ([]Person, error) {
 
 				currentRates[pair] = exchangeRate
 				usdEquiv := cv * exchangeRate
-				if usdEquiv >= criteria {
+				if usdEquiv >= float64(criteria) {
 					filteredPersons = append(filteredPersons, person)
 				}
 

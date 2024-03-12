@@ -16,7 +16,7 @@ func retrieveRate(pair string) (float64, error) {
 		return 0, err
 	}
 
-	req, err := http.NewRequest("POST", "", bytes.NewReader(marsharledJson))
+	req, err := http.NewRequest("POST", os.Getenv("EXCHANGE_API"), bytes.NewReader(marsharledJson))
 	if err != nil {
 		return 0, errors.New("Error while creating request")
 	}
@@ -70,4 +70,14 @@ func InitPersonsFromJson(jsonPath string) (Persons, error) {
 
 	return Persons{Data: *persons}, nil
 
+}
+
+func InitPersons(data []byte) (Persons, error) {
+	var p []Person
+
+	if err := json.Unmarshal(data, &p); err != nil {
+		return Persons{}, err
+	}
+
+	return Persons{Data: p}, nil
 }

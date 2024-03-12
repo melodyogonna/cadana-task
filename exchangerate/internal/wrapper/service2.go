@@ -19,7 +19,7 @@ func (s2 serviceTwo) GetExchangeRate(pair string) <-chan result {
 			c <- result{Err: err, Value: 0}
 		}
 
-		c <- result{Err: err, Value: res.(float64)}
+		c <- result{Err: err, Value: res.(float32)}
 
 	}()
 
